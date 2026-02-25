@@ -52,7 +52,7 @@ python -m openviking serve --config /path/to/ov.conf --host 127.0.0.1 --port 800
     "cors_origins": ["*"]
   },
   "storage": {
-    "workspace": "/data/openviking",
+    "workspace": "./data",
     "agfs": { "backend": "local" },
     "vectordb": { "backend": "local" }
   }
