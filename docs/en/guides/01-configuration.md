@@ -98,6 +98,7 @@ Embedding model configuration for vector search, supporting dense, sparse, and h
 ```json
 {
   "embedding": {
+    "max_concurrent": 10,
     "dense": {
       "provider": "volcengine",
       "api_key": "your-api-key",
@@ -113,6 +114,7 @@ Embedding model configuration for vector search, supporting dense, sparse, and h
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
+| `max_concurrent` | int | Maximum concurrent embedding requests (`embedding.max_concurrent`, default: `10`) |
 | `provider` | str | `"volcengine"`, `"openai"`, `"vikingdb"`, or `"jina"` |
 | `api_key` | str | API key |
 | `model` | str | Model name |
@@ -251,7 +253,7 @@ Vision Language Model for semantic extraction (L0/L1 generation).
   "vlm": {
     "api_key": "your-api-key",
     "model": "doubao-seed-1-8-251228",
-    "base_url": "https://ark.cn-beijing.volces.com/api/v3"
+    "api_base": "https://ark.cn-beijing.volces.com/api/v3"
   }
 }
 ```
@@ -262,7 +264,9 @@ Vision Language Model for semantic extraction (L0/L1 generation).
 |-----------|------|-------------|
 | `api_key` | str | API key |
 | `model` | str | Model name |
-| `base_url` | str | API endpoint (optional) |
+| `api_base` | str | API endpoint (optional) |
+| `thinking` | bool | Enable thinking mode for VolcEngine models (default: `false`) |
+| `max_concurrent` | int | Maximum concurrent semantic LLM calls (default: `100`) |
 
 **Available Models**
 
@@ -310,7 +314,7 @@ Storage backend configuration.
     "workspace": "./data",
     "agfs": {
       "backend": "local",
-      "timeout": 30.0
+      "timeout": 10
     },
     "vectordb": {
       "backend": "local"
@@ -398,6 +402,7 @@ For startup and deployment details see [Deployment](./03-deployment.md), for aut
 ```json
 {
   "embedding": {
+    "max_concurrent": 10,
     "dense": {
       "provider": "volcengine",
       "api_key": "string",
@@ -410,7 +415,9 @@ For startup and deployment details see [Deployment](./03-deployment.md), for aut
     "provider": "string",
     "api_key": "string",
     "model": "string",
-    "base_url": "string"
+    "api_base": "string",
+    "thinking": false,
+    "max_concurrent": 100
   },
   "rerank": {
     "provider": "volcengine",
@@ -420,9 +427,9 @@ For startup and deployment details see [Deployment](./03-deployment.md), for aut
   "storage": {
     "workspace": "string",
     "agfs": {
-      "backend": "local|remote",
+      "backend": "local|s3|memory",
       "url": "string",
-      "timeout": 30.0
+      "timeout": 10
     },
     "vectordb": {
       "backend": "local|remote",
