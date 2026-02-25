@@ -9,15 +9,14 @@ OpenViking 使用 JSON 配置文件（`ov.conf`）进行设置。配置文件支
 ```json
 {
   "storage": {
+    "workspace": "./data",
     "vectordb": {
       "name": "context",
-      "backend": "local",
-      "path": "./data"
+      "backend": "local"
     },
     "agfs": {
       "port": 1833,
       "log_level": "warn",
-      "path": "./data",
       "backend": "local"
     }
   },
@@ -315,14 +314,13 @@ OpenViking 使用 JSON 配置文件（`ov.conf`）进行设置。配置文件支
 ```json
 {
   "storage": {
+    "workspace": "./data",
     "agfs": {
       "backend": "local",
-      "path": "./data",
       "timeout": 30.0
     },
     "vectordb": {
-      "backend": "local",
-      "path": "./data"
+      "backend": "local"
     }
   }
 }
@@ -427,15 +425,14 @@ HTTP 客户端（`SyncHTTPClient` / `AsyncHTTPClient`）和 CLI 工具连接远�
     "model": "string"
   },
   "storage": {
+    "workspace": "string",
     "agfs": {
       "backend": "local|remote",
-      "path": "string",
       "url": "string",
       "timeout": 30.0
     },
     "vectordb": {
       "backend": "local|remote",
-      "path": "string",
       "url": "string",
       "project": "string"
     }

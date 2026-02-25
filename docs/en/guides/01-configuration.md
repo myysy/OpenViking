@@ -27,10 +27,9 @@ Create `~/.openviking/ov.conf` in your project directory:
     "model": "doubao-rerank-250615"
   },
   "storage": {
-    "agfs": {
-      "backend": "local",
-      "path": "./data"
-    }
+    "workspace": "./data",
+    "agfs": { "backend": "local" },
+    "vectordb": { "backend": "local" }
   }
 }
 ```
@@ -308,14 +307,13 @@ Storage backend configuration.
 ```json
 {
   "storage": {
+    "workspace": "./data",
     "agfs": {
       "backend": "local",
-      "path": "./data",
       "timeout": 30.0
     },
     "vectordb": {
-      "backend": "local",
-      "path": "./data"
+      "backend": "local"
     }
   }
 }
@@ -420,15 +418,14 @@ For startup and deployment details see [Deployment](./03-deployment.md), for aut
     "model": "string"
   },
   "storage": {
+    "workspace": "string",
     "agfs": {
       "backend": "local|remote",
-      "path": "string",
       "url": "string",
       "timeout": 30.0
     },
     "vectordb": {
       "backend": "local|remote",
-      "path": "string",
       "url": "string",
       "project": "string"
     }
