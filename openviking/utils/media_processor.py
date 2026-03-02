@@ -76,7 +76,7 @@ class UnifiedResourceProcessor:
         """Process URL source."""
         # Add support for Git repositories
         from openviking.utils.code_hosting_utils import (
-            is_code_hosting_url,
+            is_code_repository_root_url,
             validate_git_ssh_uri,
         )
 
@@ -86,7 +86,7 @@ class UnifiedResourceProcessor:
         if (
             url.startswith(("git@", "git://", "ssh://"))
             or url.endswith(".git")
-            or is_code_hosting_url(url)
+            or is_code_repository_root_url(url)
         ):
             from openviking.parse.parsers.code.code import CodeRepositoryParser
 

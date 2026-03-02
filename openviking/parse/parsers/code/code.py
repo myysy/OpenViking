@@ -10,6 +10,7 @@ Implements V5.0 asynchronous architecture:
 """
 
 import asyncio
+from curses import error
 import os
 import shutil
 import stat
@@ -306,7 +307,7 @@ class CodeRepositoryParser(BaseParser):
             else:
                 user_msg = "Git operation failed."
 
-            raise RuntimeError(f"{user_msg} Details: {error_msg}")
+            raise RuntimeError(f"{user_msg} Command: git {' '.join(args)}. Details: {error_msg}")
         return stdout.decode().strip()
 
     async def _has_commit(self, repo_dir: str, commit: str) -> bool:

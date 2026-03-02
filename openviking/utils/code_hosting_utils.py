@@ -54,18 +54,13 @@ def parse_code_hosting_url(url: str) -> Optional[str]:
             if len(path_segments) < 2:
                 return None
 
-            # For SSH, we support deep paths (e.g. group/subgroup/project)
-            # Remove .git from the last segment if present
-            if path_segments and path_segments[-1].endswith(".git"):
-                path_segments[-1] = path_segments[-1][:-4]
-
-            # Sanitize all segments
-            sanitized_segments = [
-                "".join(c if c.isalnum() or c in "-_" else "_" for c in s) for s in path_segments
-            ]
-
-            # Join with /
-            return "/".join(sanitized_segments)
+            org = path_segments[0]
+            repo = path_segments[1]
+            if repo.endswith(".git"):
+                repo = repo[:-4]
+            org = "".join(c if c.isalnum() or c in "-_" else "_" for c in org)
+            repo = "".join(c if c.isalnum() or c in "-_" else "_" for c in repo)
+            return f"{org}/{repo}"
 
         except Exception:
             return None
@@ -140,16 +135,50 @@ def is_code_hosting_url(url: str) -> bool:
     )
 
     if url.startswith("git@"):
-        try:
-            parts = url.split(":", 1)
-            if len(parts) == 2:
-                host_part = parts[0]
-                host = host_part[4:]
-                return host in all_domains
-        except Exception:
-            return False
+        parts = url.split(":", 1)
+        if len(parts) == 2:
+            host = parts[0][4:]
+            return host in all_domains
+        return False
 
     return urlparse(url).netloc in all_domains
+
+
+def is_code_repository_root_url(url: str) -> bool:
+    """Check if a URL points to a repository root page on a code hosting domain.
+
+    This is stricter than ``is_code_hosting_url`` and is intended for routing
+    decisions (e.g. avoid treating issues/pull/blob pages as repositories).
+    """
+    config = get_openviking_config()
+    all_domains = list(
+        set(
+            config.code.github_domains
+            + config.code.gitlab_domains
+            + config.code.code_hosting_domains
+        )
+    )
+
+    if url.startswith("git@"):
+        parts = url.split(":", 1)
+        if len(parts) != 2:
+            return False
+        host = parts[0][4:]
+        if host not in all_domains:
+            return False
+        path_part = parts[1]
+        path_segments = [p for p in path_part.split("/") if p]
+        return len(path_segments) == 2
+
+    if not url.startswith(("http://", "https://")):
+        return False
+
+    parsed = urlparse(url)
+    if parsed.netloc not in all_domains:
+        return False
+
+    path_parts = [p for p in parsed.path.split("/") if p]
+    return len(path_parts) == 2
 
 
 def validate_git_ssh_uri(uri: str) -> None:
