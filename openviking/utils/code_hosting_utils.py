@@ -25,7 +25,7 @@ def parse_code_hosting_url(url: str) -> Optional[str]:
         code hosting URL
     """
     config = get_openviking_config()
-    
+
     # Handle git@ SSH URLs
     if url.startswith("git@"):
         try:
@@ -33,13 +33,13 @@ def parse_code_hosting_url(url: str) -> Optional[str]:
             parts = url.split(":", 1)
             if len(parts) != 2:
                 return None
-            
+
             host_part = parts[0]
             path_part = parts[1]
-            
+
             # Extract host (remove 'git@')
             host = host_part[4:]
-            
+
             # Check if host is allowed
             all_domains = (
                 config.code.github_domains
@@ -48,26 +48,25 @@ def parse_code_hosting_url(url: str) -> Optional[str]:
             )
             if host not in all_domains:
                 return None
-            
+
             # Parse path part
             path_segments = [p for p in path_part.split("/") if p]
             if len(path_segments) < 2:
                 return None
-                
+
             # For SSH, we support deep paths (e.g. group/subgroup/project)
             # Remove .git from the last segment if present
             if path_segments and path_segments[-1].endswith(".git"):
                 path_segments[-1] = path_segments[-1][:-4]
-            
+
             # Sanitize all segments
             sanitized_segments = [
-                "".join(c if c.isalnum() or c in "-_" else "_" for c in s)
-                for s in path_segments
+                "".join(c if c.isalnum() or c in "-_" else "_" for c in s) for s in path_segments
             ]
-            
+
             # Join with /
             return "/".join(sanitized_segments)
-            
+
         except Exception:
             return None
 
@@ -139,7 +138,7 @@ def is_code_hosting_url(url: str) -> bool:
             + config.code.code_hosting_domains
         )
     )
-    
+
     if url.startswith("git@"):
         try:
             parts = url.split(":", 1)
@@ -149,42 +148,41 @@ def is_code_hosting_url(url: str) -> bool:
                 return host in all_domains
         except Exception:
             return False
-            
+
     return urlparse(url).netloc in all_domains
 
 
 def validate_git_ssh_uri(uri: str) -> None:
     """Validate Git SSH URI format.
-    
+
     Args:
         uri: The URI to validate.
-        
+
     Raises:
         ValueError: If the URI is invalid.
     """
     if not uri.startswith("git@"):
         return
-        
+
     if ":" not in uri:
         raise ValueError(
             f"Invalid Git SSH URI format: '{uri}'. Missing colon separator.\n"
             "Expected format: git@host:group/repo.git"
         )
-        
+
     parts = uri.split(":", 1)
     if len(parts) != 2:
         raise ValueError(f"Invalid Git SSH URI format: '{uri}'")
-        
+
     host_part = parts[0]
     path_part = parts[1]
-    
+
     if len(host_part) <= 4:  # just "git@"
         raise ValueError(f"Invalid Git SSH URI: '{uri}'. Missing host.")
-        
+
     if not path_part:
         raise ValueError(f"Invalid Git SSH URI: '{uri}'. Missing path.")
-        
+
     # Check for empty path segments which might imply malformed path
     # But strictly speaking 'git@host:repo.git' is valid (path 'repo.git')
     pass
-

@@ -293,7 +293,7 @@ class CodeRepositoryParser(BaseParser):
         stdout, stderr = await proc.communicate()
         if proc.returncode != 0:
             error_msg = stderr.decode().strip()
-            
+
             # Enhance error message for common failures
             if "Permission denied (publickey)" in error_msg:
                 user_msg = "Access denied. Please check your SSH keys and repository permissions."
@@ -305,7 +305,7 @@ class CodeRepositoryParser(BaseParser):
                 user_msg = "Connection failed. Check network connectivity to the Git server."
             else:
                 user_msg = "Git operation failed."
-                
+
             raise RuntimeError(f"{user_msg} Details: {error_msg}")
         return stdout.decode().strip()
 
