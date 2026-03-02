@@ -10,7 +10,6 @@ Implements V5.0 asynchronous architecture:
 """
 
 import asyncio
-from curses import error
 import os
 import shutil
 import stat
