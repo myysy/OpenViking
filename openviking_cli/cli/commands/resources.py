@@ -16,7 +16,7 @@ def register(app: typer.Typer) -> None:
     @app.command("add-resource")
     def add_resource_command(
         ctx: typer.Context,
-        path: str = typer.Argument(..., help="Local path or URL to import"),
+        path: str = typer.Argument(..., help="Local path or URL (http/https/git/ssh) to import"),
         to: Optional[str] = typer.Option(None, "--to", help="Target URI"),
         reason: str = typer.Option("", help="Reason for import"),
         instruction: str = typer.Option("", help="Additional instruction"),
@@ -41,7 +41,13 @@ def register(app: typer.Typer) -> None:
         """Add resources into OpenViking."""
         # Validate path: if it's a local path, check if it exists
         final_path = path
-        if not (path.startswith("http://") or path.startswith("https://")):
+        if not (
+            path.startswith("http://")
+            or path.startswith("https://")
+            or path.startswith("git@")
+            or path.startswith("ssh://")
+            or path.startswith("git://")
+        ):
             unescaped_path = path.replace("\\ ", " ")
             local_path = Path(unescaped_path)
             final_path = unescaped_path

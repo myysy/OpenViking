@@ -111,15 +111,16 @@ class CodeRepositoryParser(BaseParser):
             # 2. Fetch content (Clone or Extract)
             repo_name = "repository"
             local_dir = Path(temp_local_dir)
-            if source_str.startswith(("http://", "https://", "git://", "ssh://")):
+            if source_str.startswith(("http://", "https://", "git://", "ssh://", "git@")):
                 repo_url, branch, commit = self._parse_repo_source(source_str, **kwargs)
-                if self._is_github_url(repo_url) and not commit:
+                if self._is_github_url(repo_url) and not commit and not repo_url.startswith("git@"):
                     # Use GitHub ZIP API: single HTTPS download, no git history, much faster
+                    # Note: GitHub ZIP API doesn't work with git@ URLs (requires auth)
                     local_dir, repo_name = await self._github_zip_download(
                         repo_url, branch, temp_local_dir
                     )
                 else:
-                    # Non-GitHub URL or specific commit: fall back to git clone
+                    # Non-GitHub URL or specific commit or SSH: fall back to git clone
                     repo_name = await self._git_clone(
                         repo_url,
                         temp_local_dir,
@@ -292,7 +293,20 @@ class CodeRepositoryParser(BaseParser):
         stdout, stderr = await proc.communicate()
         if proc.returncode != 0:
             error_msg = stderr.decode().strip()
-            raise RuntimeError(f"Git command failed: {' '.join(args)}: {error_msg}")
+            
+            # Enhance error message for common failures
+            if "Permission denied (publickey)" in error_msg:
+                user_msg = "Access denied. Please check your SSH keys and repository permissions."
+            elif "Could not resolve hostname" in error_msg:
+                user_msg = "Network error. Could not resolve repository host."
+            elif "repository not found" in error_msg.lower():
+                user_msg = "Repository not found."
+            elif "connect to host" in error_msg and "port 22" in error_msg:
+                user_msg = "Connection failed. Check network connectivity to the Git server."
+            else:
+                user_msg = "Git operation failed."
+                
+            raise RuntimeError(f"{user_msg} Details: {error_msg}")
         return stdout.decode().strip()
 
     async def _has_commit(self, repo_dir: str, commit: str) -> bool:

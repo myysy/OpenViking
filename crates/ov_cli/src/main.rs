@@ -597,7 +597,12 @@ async fn handle_add_resource(
     ctx: CliContext,
 ) -> Result<()> {
     // Validate path: if it's a local path, check if it exists
-    if !path.starts_with("http://") && !path.starts_with("https://") {
+    if !path.starts_with("http://") 
+        && !path.starts_with("https://") 
+        && !path.starts_with("git@") 
+        && !path.starts_with("ssh://") 
+        && !path.starts_with("git://") 
+    {
         use std::path::Path;
         
         // Unescape path: replace backslash followed by space with just space

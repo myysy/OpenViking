@@ -51,7 +51,7 @@ class UnifiedResourceProcessor:
         """Process any source (file/URL/content) with appropriate strategy."""
         # Check if URL
         if self._is_url(source):
-            return await self._process_url(source, instruction)
+            return await self._process_url(source, instruction, **kwargs)
 
         # Check if looks like a file path (short enough and no newlines)
         is_potential_path = len(source) <= 1024 and "\n" not in source
@@ -70,10 +70,29 @@ class UnifiedResourceProcessor:
 
     def _is_url(self, source: str) -> bool:
         """Check if source is a URL."""
-        return source.startswith(("http://", "https://"))
+        return source.startswith(("http://", "https://", "git@", "ssh://", "git://"))
 
-    async def _process_url(self, url: str, instruction: str) -> ParseResult:
+    async def _process_url(self, url: str, instruction: str, **kwargs) -> ParseResult:
         """Process URL source."""
+        # Add support for Git repositories
+        from openviking.utils.code_hosting_utils import (
+            is_code_hosting_url,
+            validate_git_ssh_uri,
+        )
+
+        if url.startswith("git@"):
+            validate_git_ssh_uri(url)
+
+        if (
+            url.startswith(("git@", "git://", "ssh://"))
+            or url.endswith(".git")
+            or is_code_hosting_url(url)
+        ):
+            from openviking.parse.parsers.code.code import CodeRepositoryParser
+
+            parser = CodeRepositoryParser()
+            return await parser.parse(url, instruction=instruction, **kwargs)
+
         from openviking.parse.parsers.html import HTMLParser
 
         parser = HTMLParser()

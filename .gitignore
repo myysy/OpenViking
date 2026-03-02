@@ -107,6 +107,8 @@ Temporary Items
 CLAUDE.md
 *.so
 AGENTS.md
+.coco
+.specify
 
 # Git worktrees
 .worktrees/
